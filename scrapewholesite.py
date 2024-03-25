@@ -120,7 +120,7 @@ def get_markdown_from_url(url):
 
 
 # Function to crawl a website
-def crawl_site(base_url, max_depth=3, max_url=2):
+def crawl_site(base_url, max_depth=3, max_url=20):
     visited_urls = set()
     site_content = []
 
