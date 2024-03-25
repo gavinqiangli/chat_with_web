@@ -5,7 +5,7 @@ import requests
 import json
 import os
 import html2text
-
+from scraping.web_scrape import browse_website
 
 load_dotenv()
 brwoserless_api_key = os.getenv("BROWSERLESS_API_KEY")
@@ -121,6 +121,7 @@ def get_markdown_from_url(url):
 
 
 # Function to crawl a website
+# method 1: use expensive but well functional "browserless.io"
 def crawl_site(site_url, max_depth=3, max_url=20):
     if site_url is not None and not site_url.startswith(('http://', 'https://')):
         site_url = "https://" + site_url
@@ -144,6 +145,7 @@ def crawl_site(site_url, max_depth=3, max_url=20):
         visited_urls.add(url)
         print(f"Added URL: {url}")   
 
+        # method 1: use expensive browserless.io
         html = scrape_website(url)
         if html is None:
             return
@@ -157,6 +159,51 @@ def crawl_site(site_url, max_depth=3, max_url=20):
         # # Find all anchor tags and crawl their href attributes
         for link in soup.find_all('a'):
             next_link = link.get('href')
+            if next_link is not None and next_link.startswith('/') or next_link.startswith(base_url):
+                next_url = urljoin(base_url, next_link)
+                recursive_crawl(next_url, depth + 1)
+
+
+    recursive_crawl(base_url, 0)
+
+    # Iterate through the list of URLs
+    print(f"visited_urls are: {visited_urls}")
+
+    return site_content
+
+# method 2: use free selenium, also works pretty well
+def crawl_site_selenium(site_url, max_depth=3, max_url=120):
+    if site_url is not None and not site_url.startswith(('http://', 'https://')):
+        site_url = "https://" + site_url
+    
+    base_url = get_base_url(site_url)
+    print(f"base_url is: {base_url}")
+
+    visited_urls = set()
+    site_content = []
+
+    def recursive_crawl(url, depth):
+        if depth > max_depth:
+            return
+        
+        if len(visited_urls) > max_url:
+            return
+
+        if url in visited_urls:
+            return
+
+        visited_urls.add(url)
+        print(f"Added URL: {url}")   
+
+        # method 2: use free selenium
+        markdown, links = browse_website(url)
+        site_content.append(markdown + "\n\n")
+
+        print(f"Crawled URL: {url}")  
+        # Process the page content here or extract data
+        # # Find all anchor tags and crawl their href attributes
+        for link in links:
+            next_link = link
             if next_link is not None and next_link.startswith('/') or next_link.startswith(base_url):
                 next_url = urljoin(base_url, next_link)
                 recursive_crawl(next_url, depth + 1)

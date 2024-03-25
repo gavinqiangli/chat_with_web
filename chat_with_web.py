@@ -9,7 +9,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
-from scrapewholesite import crawl_site
+from scrapewholesite import crawl_site, crawl_site_selenium
 
 
 from dotenv import load_dotenv
@@ -36,7 +36,7 @@ st.markdown(
 @st.cache_resource(ttl="1h")
 def configure_retriever(site_url):
     # Read documents
-    site_content = crawl_site(site_url)
+    site_content = crawl_site_selenium(site_url)
     print(site_content)
     # Split documents
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
