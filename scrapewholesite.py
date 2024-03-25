@@ -53,6 +53,7 @@ def scrape_website(url: str):
         return html_string
     else:
         print(f"HTTP request failed with status code {response.status_code}")
+        return
 
 
 # 2. Convert html to markdown
@@ -121,7 +122,12 @@ def get_markdown_from_url(url):
 
 # Function to crawl a website
 def crawl_site(site_url, max_depth=3, max_url=20):
+    if site_url is not None and not site_url.startswith(('http://', 'https://')):
+        site_url = "https://" + site_url
+    
     base_url = get_base_url(site_url)
+    print(f"base_url is: {base_url}")
+
     visited_urls = set()
     site_content = []
 
@@ -139,8 +145,10 @@ def crawl_site(site_url, max_depth=3, max_url=20):
         print(f"Added URL: {url}")   
 
         html = scrape_website(url)
-        updated_html = convert_to_absolute_url(html, base_url)
-        markdown = convert_html_to_markdown(updated_html)
+        if html is None:
+            return
+        
+        markdown = convert_html_to_markdown(html)
         site_content.append(markdown + "\n\n")
 
         soup = BeautifulSoup(html, 'html.parser')
