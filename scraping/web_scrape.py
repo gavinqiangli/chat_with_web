@@ -14,6 +14,9 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.safari.options import Options as SafariOptions
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 
 from scraping import scrape_skills, processing as summary
 from scraping.processing.html import extract_hyperlinks
@@ -91,7 +94,11 @@ def scrape_text_with_selenium(selenium_web_browser: str, user_agent: str, url: s
             options.add_argument("--remote-debugging-port=9222")
         options.add_argument("--no-sandbox")
         options.add_experimental_option("prefs", {"download_restrictions": 3})
-        driver = webdriver.Chrome(options=options)
+        
+        # run Selenium with local brower for local test
+        # driver = webdriver.Chrome(options=options)
+        # run Selenium on streamlit cloud, refer to https://selenium.streamlit.app/
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=options)
 
     print(f"scraping url {url}...")
     driver.get(url)

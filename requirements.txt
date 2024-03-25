@@ -9,3 +9,5 @@ docarray==0.40.0
 bs4
 html2text
 selenium
+seleniumbase
+webdriver-manager
