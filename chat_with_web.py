@@ -34,9 +34,9 @@ st.markdown(
     )
 
 @st.cache_resource(ttl="1h")
-def configure_retriever(url):
+def configure_retriever(site_url):
     # Read documents
-    site_content = crawl_site(url)
+    site_content = crawl_site(site_url)
     print(site_content)
     # Split documents
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)

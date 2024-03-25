@@ -120,7 +120,8 @@ def get_markdown_from_url(url):
 
 
 # Function to crawl a website
-def crawl_site(base_url, max_depth=3, max_url=20):
+def crawl_site(site_url, max_depth=3, max_url=20):
+    base_url = get_base_url(site_url)
     visited_urls = set()
     site_content = []
 
@@ -138,7 +139,8 @@ def crawl_site(base_url, max_depth=3, max_url=20):
         print(f"Added URL: {url}")   
 
         html = scrape_website(url)
-        markdown = convert_html_to_markdown(html)
+        updated_html = convert_to_absolute_url(html, base_url)
+        markdown = convert_html_to_markdown(updated_html)
         site_content.append(markdown + "\n\n")
 
         soup = BeautifulSoup(html, 'html.parser')
