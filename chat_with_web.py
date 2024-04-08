@@ -37,6 +37,8 @@ st.markdown(
 def configure_retriever(site_url):
     # Read documents
     site_content = crawl_site_selenium(site_url)
+    if site_content == []:
+        return
     print(site_content)
     # Split documents
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
@@ -98,6 +100,10 @@ if not url:
     st.stop()
 
 retriever = configure_retriever(url)
+
+if retriever is None:
+    st.warning("Error in scraping url. Please type in a valid url.")
+    st.stop()
 
 # Setup memory for contextual conversation
 msgs = StreamlitChatMessageHistory()

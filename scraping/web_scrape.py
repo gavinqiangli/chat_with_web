@@ -17,6 +17,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
+from selenium.common.exceptions import WebDriverException
 
 from scraping import scrape_skills, processing as summary
 from scraping.processing.html import extract_hyperlinks
@@ -82,26 +83,34 @@ def scrape_text_with_selenium(selenium_web_browser: str, user_agent: str, url: s
     options.add_argument("--headless")
     options.add_argument("--enable-javascript")
 
-    if selenium_web_browser == "firefox":
-        driver = webdriver.Firefox(options=options)
-    elif selenium_web_browser == "safari":
-        # Requires a bit more setup on the users end
-        # See https://developer.apple.com/documentation/webkit/testing_with_webdriver_in_safari
-        driver = webdriver.Safari(options=options)
-    else:
-        if platform == "linux" or platform == "linux2":
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--remote-debugging-port=9222")
-        options.add_argument("--no-sandbox")
-        options.add_experimental_option("prefs", {"download_restrictions": 3})
-        
-        # run Selenium with local brower for local test
-        # driver = webdriver.Chrome(options=options)
-        # run Selenium on streamlit cloud, refer to https://selenium.streamlit.app/
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=options)
+    try:
+        if selenium_web_browser == "firefox":
+            driver = webdriver.Firefox(options=options)
+        elif selenium_web_browser == "safari":
+            # Requires a bit more setup on the users end
+            # See https://developer.apple.com/documentation/webkit/testing_with_webdriver_in_safari
+            driver = webdriver.Safari(options=options)
+        else:
+            if platform == "linux" or platform == "linux2":
+                options.add_argument("--disable-dev-shm-usage")
+                options.add_argument("--remote-debugging-port=9222")
+            options.add_argument("--no-sandbox")
+            options.add_experimental_option("prefs", {"download_restrictions": 3})
+            
+            # need to define driver differently depending on local testing or cloud deployment
 
-    print(f"scraping url {url}...")
-    driver.get(url)
+            # run Selenium with local brower for local test
+            # driver = webdriver.Chrome(options=options)
+
+            # run Selenium on streamlit cloud, refer to https://selenium.streamlit.app/
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=options)
+
+        print(f"scraping url {url}...")
+        
+        driver.get(url)
+    except WebDriverException as e:
+        print("An error occurred while scraping:", e)
+        return driver, ""
 
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))

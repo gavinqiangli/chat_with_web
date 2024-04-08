@@ -197,7 +197,8 @@ def crawl_site_selenium(site_url, max_depth=3, max_url=120):
 
         # method 2: use free selenium
         markdown, links = browse_website(url)
-        site_content.append(markdown + "\n\n")
+        if markdown:
+            site_content.append(markdown)
 
         print(f"Crawled URL: {url}")  
         # Process the page content here or extract data
